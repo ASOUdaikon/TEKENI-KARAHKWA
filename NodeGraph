@@ -1,0 +1,256 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+//
+using System;
+
+public class NodeGraph : MonoBehaviour
+{
+    // FIXME
+    NodeSpriteController nSC;
+    //
+    Action<Node> cbNodeChanged;
+
+    // Set in inspector; editor mode.
+    public Sprite testSprite;
+
+    List<Node> nodesList;
+    public Node[,] nodesArray;
+
+    // 
+    int nodesPerTileAxes = 2;
+    [HideInInspector]
+    public int nodeGraphSizeX;
+    [HideInInspector]
+    public int nodeGraphSizeY;
+
+    // public int NodeGraphSizeX { get { return node}; protected set; }
+    // public int NodeGraphSizeY { get; protected set; }
+
+    void Start()
+    {
+        // FIXME
+        nSC = GetComponent<NodeSpriteController>();
+
+        nodesList = new List<Node>();
+
+        nodeGraphSizeX = WorldController.Instance.world.Width * nodesPerTileAxes;
+        nodeGraphSizeY = WorldController.Instance.world.Height * nodesPerTileAxes;
+         
+        // If I am to not use these variables, specifically the 'NodeGraphSizeX'/'NodeGraphSizeY',
+        // will have to change 10~ references below.
+        // int nodeGraphSizeX = WorldController.Instance.world.Width * nodesPerTileAxes;
+        // int nodeGraphSizeY = WorldController.Instance.world.Height * nodesPerTileAxes;
+        // NodeGraphSizeX = nodeGraphSizeX;
+        // NodeGraphSizeY = nodeGraphSizeY;
+
+        // GenerateNodeGraph();
+        // GenerateNodeGraph002();
+        GenerateNodeGraph003();
+        // nSC.SetupNodeSprites();
+        Debug.Log(nodesList.Count);  // 400 nodes when we're 10x10 tiles. 40,000 nodes when 100x100 tiles.
+        // Debug.Log(1 / 2);
+    }
+
+    // CHANGES HERE : GenerateNodeGraph001 and GenerateNodeGraph002 have 
+    //                both had their Node default constructor calls updated 
+    //                to include a 'NodeGraph' reference : 'this'.
+
+    void GenerateNodeGraph001()
+    {
+        // Generate node holder.
+        GameObject nodeHolder = new GameObject();
+        nodeHolder.name = "Node_Holder";
+        nodeHolder.transform.position = Vector3.zero;
+
+        // Generate nodes.
+        for (int x = 0; x < 100; x++)
+        {
+            for (int y = 0; y < 100; y++)
+            {
+                // Get the tile that encompasses the node.
+                Tile tileUnderNode = WorldController.Instance.world.GetTileAt(x, y);
+
+                // Create new node.
+                Node n = new Node(this, x, y, tileUnderNode);
+
+                // Set new node's position.
+                GameObject node_go = new GameObject();
+                node_go.transform.name = "Node_(" + x + ", " + y + ")";
+                node_go.transform.SetParent(nodeHolder.transform);
+                node_go.transform.position = new Vector3(x, y, 0);
+
+                // Set new node's sprite.
+                SpriteRenderer sr = node_go.AddComponent<SpriteRenderer>();
+                sr.sprite = testSprite;
+                
+            }
+        }
+
+    }
+
+    void GenerateNodeGraph002()
+    {
+        // World width/height * nodes per tile. :: 100 * 2 == 200 x 200 nodes (40,000)
+        nodesArray = new Node[nodeGraphSizeX, nodeGraphSizeY];
+
+        // Generate node holder.
+        GameObject nodeHolder = new GameObject();
+        nodeHolder.name = "Node_Holder";
+        nodeHolder.transform.position = Vector3.zero;
+
+        // Generate nodes.
+        
+        // "Tile" for loops. * Have better description here.
+        // x/y should be width and height of world respectively.
+        for (int x = 0; x < 100; x++)     // x and y were defaulted to 2 (working)
+        {
+            for (int y = 0; y < 100; y++)
+            {
+                // "Node" for loops. * Have better description here.
+                for (int a = 0; a < nodesPerTileAxes; a++)
+                {
+                    for (int b = 0; b < nodesPerTileAxes; b++)
+                    {
+
+                        float nodeX = x;
+                        float nodeY = y;
+
+                        if (a % 2 != 0)
+                        {
+                            nodeX += 0.5f;
+                        }
+                        if(b % 2 != 0)
+                        {
+                            nodeY += 0.5f;
+                        }
+
+                        // Get the tile that encompasses the node.
+                        Tile tileUnderNode = WorldController.Instance.world.GetTileAt(x, y);
+
+                        // Create new node.
+                        Node n = new Node(this, nodeX, nodeY, tileUnderNode);
+
+                        // Set new node's position.
+                        GameObject node_go = new GameObject();
+                        node_go.transform.name = "Node_(" + nodeX + ", " + nodeY + ")";
+                        node_go.transform.SetParent(nodeHolder.transform);
+                        node_go.transform.position = new Vector3(nodeX, nodeY, 0);
+
+                        // Set new node's sprite.
+                        /*
+                        SpriteRenderer sr = node_go.AddComponent<SpriteRenderer>();
+                        sr.sprite = testSprite;
+                        sr.sortingLayerName = "Node";
+                        */
+                        
+                        nodesList.Add(n);
+                        
+                    }
+                }
+
+            }
+        }
+
+    }
+
+    void GenerateNodeGraph003()
+    {
+        // World width/height * nodes per tile. :: 100 * 2 == 200 x 200 nodes (40,000)
+        nodesArray = new Node[nodeGraphSizeX, nodeGraphSizeY];
+
+        // Generate node holder.
+        GameObject nodeHolder = new GameObject();
+        nodeHolder.name = "Node_Holder";
+        nodeHolder.transform.position = Vector3.zero;
+
+        // Generate nodes.
+        // x/y should be width and height of world respectively.
+        for (int x = 0; x < nodeGraphSizeX; x++)     // x and y were defaulted to 2 (working values)
+        {
+            for (int y = 0; y < nodeGraphSizeY; y++)
+            {
+                // Get the node's x/y - positions.
+                float nodeX = x / nodesPerTileAxes;
+                float nodeY = y / nodesPerTileAxes;
+
+                // Or should we constrain modulo 'divisor' to hard-coded 2?
+                if (x % nodesPerTileAxes != 0)  // Divide an int by 2... (default : 2)
+                {
+                    nodeX += 0.5f;
+                }
+                if (y % nodesPerTileAxes != 0)
+                {
+                    nodeY += 0.5f;
+                }
+
+                // Get the tile that encompasses the node.
+                Tile tileUnderNode = WorldController.Instance.world.GetTileAt(x / 2, y/ 2);
+
+                // Create new node.
+                Node n = new Node(this, nodeX, nodeY, tileUnderNode);
+                
+                // Add node to nodes array.
+                nodesArray[x, y] = n;
+
+                // Set new node's position.
+                GameObject node_go = new GameObject();
+                node_go.transform.name = "Node_(" + nodeX + ", " + nodeY + ")";
+                node_go.transform.SetParent(nodeHolder.transform);
+                node_go.transform.position = new Vector3(nodeX, nodeY, 0);
+
+                // Set new node's sprite.
+                /*
+                SpriteRenderer sr = node_go.AddComponent<SpriteRenderer>();
+                sr.sprite = testSprite;
+                sr.sortingLayerName = "Node";
+                */
+
+                n.RegisterNodeChangedCallback(OnNodeChanged);
+
+                nodesList.Add(n);
+
+            }
+        }
+    }
+    
+    // 'GetTileAt()' has : 
+    //                     8 'GetNeighbor'                              ** in Tile
+    //                     4 NESW                                       ** in Tile
+    //                     1 '...FromCoord'                             ** in WorldController
+    //                     1 for getting data, game object pair         ** TileSpriteController
+
+    public Node GetNodeAt(int x, int y)
+    {
+        // Debug.Log("NodeGraph -- GetNodeAt ACTUAL.");
+        if (x >= nodeGraphSizeX || x < 0 || y >= nodeGraphSizeY || y < 0)
+        {
+            Debug.LogError("NODE (" + x + " ," + y + ") is out of range.");
+            return null;
+        }
+
+        Debug.Log("NODEGRAPH -- Node[" + x + ", " + y + "] is centered at world position : " + nodesArray[x, y].nodePosX + ", " + nodesArray[x, y].nodePosY);
+        return nodesArray[x, y];
+    }
+
+    public void RegisterNodeChanged(Action<Node> callbackFunc)
+    {
+        cbNodeChanged += callbackFunc;
+    }
+
+    public void UnregisterNodeChanged(Action<Node> callbackFunc)
+    {
+        cbNodeChanged -= callbackFunc;
+    }
+
+    void OnNodeChanged(Node node)
+    {
+        if(cbNodeChanged == null)
+        {
+            return;
+        }
+
+        cbNodeChanged(node);
+    }
+
+}
