@@ -1,0 +1,183 @@
+//
+using System;
+//
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public enum TileType { Grass, Mud, Water };
+
+public class Tile 
+{
+    private TileType type = TileType.Grass;
+
+    public TileType Type
+    {
+        get { return type; }
+        set
+        {
+            TileType oldType = type;
+            type = value;
+            if(cbTileChanged != null && oldType != type)
+            {
+                cbTileChanged(this);
+            }
+        }
+    }
+
+    public World world { get; protected set; }
+
+    public int X { get; protected set; }
+    public int Y { get; protected set; }
+
+    // FIXME : This is just hard-coded for now.
+    //         Basically just a reminder of something we might want to do more with in the future.
+    //         Different tile types have different movement costs? (Is that what we mean? EP32; 32:30)
+    const float baseTileMovementCost = 1f;
+
+    public float movementCost
+    {
+        get
+        {
+            if (Type == TileType.Water)
+            {
+                return 0;
+            }
+
+            return baseTileMovementCost;
+
+        }
+    }
+
+    Action<Tile> cbTileChanged;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Tile"/> class.
+    /// </summary>
+    /// <param name="world">A World instance.</param>
+    /// <param name="x">The x-coordinate.</param>
+    /// <param name="y">The y-coordinate.</param>
+    public Tile(World world, int x, int y)
+    {
+        this.world = world;
+        this.X = x;
+        this.Y = y;
+    }
+
+    // Register a function (that requires a tile argument) to be called whenever 
+    // 'cbTileTypeChanged' is called. (Whenever a tile's type is 'set'.)
+    public void RegisterTileTypeChangedCallback(Action<Tile> callback)
+    {
+        // W.OTC
+        cbTileChanged += callback;
+    }
+
+    public void UnregisterTileTypeChangedCallback(Action<Tile> callback)
+    {
+        cbTileChanged -= callback;
+    }
+
+    // Tells us if two tiles are adjacent.
+    public bool IsNeighbor(Tile tile, bool diagOkay = false)
+    {
+        // Check to see if we have a difference of exactly ONE between the two
+        // tile coordinates. If so, then we are vertical or horizontal neighbors.
+        return
+                Mathf.Abs(this.X - tile.X) + Mathf.Abs(this.Y - tile.Y) == 1 ||                  // Check horizontal/vertical adjacency.
+                (diagOkay && Mathf.Abs(this.X - tile.X) == 1 && Mathf.Abs(this.Y - tile.Y) == 1) // Check diagonal adjacency.
+                ;
+
+        #region Less-sophisticated code
+        /*
+        if(this.X == tile.X && (this.Y == tile.Y + 1 || this.Y == tile.Y - 1))
+        {
+            return true;
+        }
+
+        if(this.Y == tile.Y && (this.X == tile.X + 1 || this.X == tile.X - 1))
+        {
+            return true;
+        }
+
+        if(diagOkay)
+        {
+            if(this.X == tile.X + 1 && (this.Y == tile.Y + 1 || this.Y == tile.Y - 1))
+            {
+                return true;
+            }
+            if (this.X == tile.X - 1 && (this.Y == tile.Y + 1 || this.Y == tile.Y - 1))
+            {
+                return true;
+            }
+        }
+
+        return false;
+        */
+        #endregion
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="diagOkay">Is diagonal movement okay?</param>
+    /// <returns></returns>
+    public Tile[] GetNeighborTiles(bool diagOkay = false)
+    {
+        Tile[] neighborTiles;
+
+        if (diagOkay == false)
+        {
+            neighborTiles = new Tile[4];    // N E S W
+        }
+        else
+        {
+            neighborTiles = new Tile[8];    // N E S W NE SE SW NW
+        }
+
+        Tile potentialNeighbor;
+
+        potentialNeighbor = world.GetTileAt(X, Y + 1);
+        neighborTiles[0] = potentialNeighbor;               // Could be null, but that's okay.
+        potentialNeighbor = world.GetTileAt(X + 1, Y);
+        neighborTiles[1] = potentialNeighbor;               // Could be null, but that's okay.
+        potentialNeighbor = world.GetTileAt(X, Y - 1);
+        neighborTiles[2] = potentialNeighbor;               // Could be null, but that's okay.
+        potentialNeighbor = world.GetTileAt(X - 1, Y);
+        neighborTiles[3] = potentialNeighbor;               // Could be null, but that's okay.
+
+        if (diagOkay == true)
+        {
+            potentialNeighbor = world.GetTileAt(X + 1, Y + 1);
+            neighborTiles[4] = potentialNeighbor;               // Could be null, but that's okay.
+            potentialNeighbor = world.GetTileAt(X + 1, Y - 1);
+            neighborTiles[5] = potentialNeighbor;               // Could be null, but that's okay.
+            potentialNeighbor = world.GetTileAt(X - 1, Y - 1);
+            neighborTiles[6] = potentialNeighbor;               // Could be null, but that's okay.
+            potentialNeighbor = world.GetTileAt(X - 1, Y + 1);
+            neighborTiles[7] = potentialNeighbor;               // Could be null, but that's okay.
+        }
+
+        return neighborTiles;
+    }
+
+    public Tile North()
+    {
+        return world.GetTileAt(X, Y + 1);
+    }
+
+    public Tile South()
+    {
+        return world.GetTileAt(X, Y - 1);
+    }
+
+    public Tile East()
+    {
+        return world.GetTileAt(X + 1, Y);
+    }
+
+    public Tile West()
+    {
+        return world.GetTileAt(X - 1, Y);
+    }
+
+}
