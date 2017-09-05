@@ -1,0 +1,98 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+// Since this is for testing, attach this to our node graph.
+
+public class NodeSpriteController : MonoBehaviour {
+
+    // Use the white square outline.
+    public Sprite nodeSprite;
+
+    Dictionary<Node, GameObject> nodeGameObjectMap;
+
+    NodeGraph nodeGraph;
+
+	void Start ()
+    {
+        Debug.Log("NodeSpriteController == Start()");
+
+        nodeGraph = WorldController.Instance.nodeGraph;
+
+        if(nodeGraph == null)
+        {
+            Debug.Log("No 'NodeGraph' reference found.");
+        }
+
+        nodeGameObjectMap = new Dictionary<Node, GameObject>();
+
+        SetupNodeSprites();
+    }
+    
+    public void SetupNodeSprites()
+    {
+        Debug.Log("SetupNodeSprites");
+        if (nodeGraph == null)
+        {
+            Debug.Log("What the fuck");
+        }
+
+        Debug.Log(nodeGraph.nodeGraphSizeX + ", " + nodeGraph.nodeGraphSizeY);
+
+        for (int x = 0; x < nodeGraph.nodeGraphSizeY; x++)
+        {
+            for (int y = 0; y < nodeGraph.nodeGraphSizeY; y++)
+            {
+                Node node_data = nodeGraph.nodesArray[x, y];
+
+                GameObject node_go = new GameObject();
+
+                nodeGameObjectMap.Add(node_data, node_go);
+
+                node_go.name = "Node_" + x + "_" + y;
+                node_go.transform.position = new Vector3(node_data.nodePosX, node_data.nodePosY, 0);
+                node_go.transform.SetParent(this.transform, true);
+
+                SpriteRenderer sr = node_go.AddComponent<SpriteRenderer>();
+                sr.sprite = nodeSprite;
+                sr.sortingLayerName = "Node";
+
+                nodeGraph.RegisterNodeChanged(OnNodeChanged);
+
+                // Debug.Log("Node : " + x + ", " + y);
+            }
+        }
+    }
+
+    void OnNodeChanged(Node node_data)
+    {
+        if(nodeGameObjectMap.ContainsKey(node_data) == false)
+        {
+            Debug.LogError("nodeGameObjectMap doesn't contain the node_data -- did you forget to add the node to the dictionary? Or maybe forgot to unregister a callback?");
+            return;
+        }
+
+        GameObject node_go = nodeGameObjectMap[node_data];
+
+        if(node_go == null)
+        {
+            Debug.LogError("nodeGameObjectMap doesn't contain the node_data -- did you forget to add the node to the dictionary? Or maybe forgot to unregister a callback?");
+            return;
+        }
+
+        if(node_data.VisualState == true)
+        {
+            nodeGameObjectMap[node_data].SetActive(true);
+        }
+        else if(node_data.VisualState == false)
+        {
+            nodeGameObjectMap[node_data].SetActive(false);
+        }
+        else
+        {
+            Debug.LogError("NodeGraph -- OnNodeChanged() -- It's a bool, what the fuck.");
+        }
+
+    }
+
+}
