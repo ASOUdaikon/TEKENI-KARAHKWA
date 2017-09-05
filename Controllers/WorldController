@@ -1,0 +1,75 @@
+//
+using System;
+using System.Linq;
+//
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class WorldController : MonoBehaviour
+{
+    public static WorldController Instance { get; protected set; }
+
+    public World world { get; protected set; }
+
+    // Needs to be 'public' for other classes to reference it.
+    public NodeGraph nodeGraph;
+
+    void OnEnable()
+    {
+        if (Instance != null)
+        {
+            Debug.LogError("There should never be two world controllers.");
+        }
+        Instance = this; // Meaning, literally this script or 'instance' of this script (whatever it is attached to) is the actual WorldController.
+        
+        // 
+        nodeGraph = FindObjectOfType<NodeGraph>();
+        if (nodeGraph == null)
+        {
+            Debug.Log("WorldController does not have an active reference to 'nodeGraph'.");
+        }
+
+        CreateEmptyWorld();
+    }
+
+    /// Gets the tile at the unity-space coordinates.
+    /// </summary>
+    /// <returns>The tile at world coordinates.</returns>
+    /// <param name="coord">Unity World-Space coordinates.</param>
+    public Tile GetTileAtWorldCoord(Vector3 coord)
+    {
+        int x = Mathf.FloorToInt(coord.x);
+        int y = Mathf.FloorToInt(coord.y);
+
+        return world.GetTileAt(x, y);
+    }
+
+    // TODO : this needs a lot work
+    public Node GetNodeAtWorldCoord(Vector3 coord)
+    {
+        int x = Mathf.FloorToInt(coord.x);
+        int y = Mathf.FloorToInt(coord.y);
+        
+        if(coord.x > 0.5f)
+        {
+            // x += 0.5f;
+        }
+
+        return nodeGraph.GetNodeAt(x, y);
+    }
+
+    void CreateEmptyWorld()
+    {
+        // Create a world with empty tiles.
+        // world = new World(100, 100);
+
+        // For testing.
+        world = new World(10, 10);
+
+        // Center the camera.
+        Camera.main.transform.position = new Vector3(world.Width / 2, world.Height / 2, Camera.main.transform.position.z);
+
+    }
+
+}
