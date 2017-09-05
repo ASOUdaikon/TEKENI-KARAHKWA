@@ -1,0 +1,138 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class MouseController : MonoBehaviour {
+
+    // *** DO NO DRAG IN INSPECTOR ***
+    // ************************* NEEDED TO BE PUBLIC TO DRAG IN REFERENCE. ************************
+    NodeGraph nodeGraph;
+    
+	void Start ()
+    {
+        nodeGraph = WorldController.Instance.nodeGraph;
+        
+        if(nodeGraph == null)
+        {
+            Debug.Log("MouseController does not have an active reference to 'nodeGraph'.");
+        }
+	}
+	
+	void Update ()
+    {
+		if(Input.GetMouseButtonDown(0))
+        {
+            Vector3 cursorPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            // Debug.Log(cursorPosition);
+            // Debug.Log(cursorPosition.x + " subtracted by " + (int)cursorPosition.x + " equals " + (cursorPosition.x - (int)cursorPosition.x));
+            Node nodeUnderMouse = GetNodeFromMouseClick(cursorPosition.x, cursorPosition.y);
+            NodeSpriteSwapActiveState(nodeUnderMouse);
+            // Debug.Log("MOUSECONTROLLER -- Node at mouse left-click position : " + nodeUnderMouse.nodePosX + ", " + nodeUnderMouse.nodePosY);
+            Debug.Log("This node has a movement cost of : " + nodeUnderMouse.tile.movementCost);
+        }
+	}
+
+    public void NodeSpriteSwapActiveState(Node nodeUnderMouse)
+    {
+        if(nodeUnderMouse.VisualState == true)
+        {
+            nodeUnderMouse.VisualState = false;
+        }
+        else if(nodeUnderMouse.VisualState == false)
+        {
+            nodeUnderMouse.VisualState = true;
+        }
+    }
+
+    // ******** MAYBE MOVE THIS TO 'NODEGRAPH'.
+    // Working toward getting 'GetNodeAt()' functioning first.
+    // 'GetTileAt()' exists in 'World', so
+    // 'GetNodeAt()' should exist in 'NodeGraph'.
+    // Evaluate case for when : 
+    //                          x = 2, and we're trying to get both nodes residing in x-2.
+    //                          How does that work? We multiply 2 to get 4, the first node?
+    //                          Or is that the second? 
+    //                          For example :
+    //                                        x-0 ... nodes are numbered x-0 and x-1? Via 0-index.
+    //                          Etc.
+
+    // Returning a single integer might not be the way we want to go about this.
+    // May need to incorporate this into 'GetNodeAt()'.
+
+    // May need to split up into two functions? One that returns x and one that returns y?
+    
+    public int WORKINGTITLE_ReturnIntegerFromFloat(Vector3 coord)
+    {
+        int productX, productY;
+        int numberX = (int)coord.x;
+        int numberY = (int)coord.y;
+        float xDecRemainder = coord.x - (int)coord.x;
+        float yDecRemainder = coord.y - (int)coord.y;
+        // Debug.Log(coord.x);
+        // Debug.Log(xDecRemainder);
+        // Debug.Log(numberX);
+
+        productX = numberX * 2;
+        productY = numberY * 2;
+
+        // More suited for 'GetNodeAt'.
+        // This doesn't fit in our 'ReturnInteger' model. Because 'coord.x == 2' would be
+        // multiplied by 2, to equal 4. Not necessarily trimming our extra decimal figures.
+        if(xDecRemainder >= 0.5f)
+        {
+            // Then we multiply numberX by (nodesPerTile(technically?)) 2.
+            productX += 1;
+        }
+        if (yDecRemainder >= 0.5f)
+        {
+            productY += 1;
+        }
+
+        Debug.Log("We took in coord.x : " + coord.x + ", cast it to an integer : " + numberX + ", and then applied our equation to get : " + productX);
+        Debug.Log("We took in coord.y : " + coord.y + ", cast it to an integer : " + numberY + ", and then applied our equation to get : " + productY);
+
+        return productX;
+    }
+
+    public Node GetNodeFromMouseClick(float coordX, float coordY)
+    {
+        int productX, productY;
+        // int numberX = (int)coordX;
+        int numberX = Mathf.FloorToInt(coordX);
+        // int numberY = (int)coordY;
+        int numberY = Mathf.FloorToInt(coordY);
+        //float xDecRemainder = coordX - (int)coordX;
+        float xDecRemainder = coordX - numberX;
+        // float yDecRemainder = coordY - (int)coordY;
+        float yDecRemainder = coordY - numberY;
+        // Debug.Log(coord.x);
+        // Debug.Log(xDecRemainder);
+        // Debug.Log(numberX);
+
+        productX = numberX * 2;
+        productY = numberY * 2;
+
+        // More suited for 'GetNodeAt'.
+        // This doesn't fit in our 'ReturnInteger' model. Because 'coord.x == 2' would be
+        // multiplied by 2, to equal 4. Not necessarily trimming our extra decimal figures.
+        if (xDecRemainder >= 0.5f)
+        {
+            // Then we multiply numberX by (nodesPerTile(technically?)) 2.
+            productX += 1;
+        }
+        if (yDecRemainder >= 0.5f)
+        {
+            productY += 1;
+        }
+
+        // Debug.Log("We took in coord.x : " + coordX + ", cast it to an integer : " + numberX + ", and then applied our equation to get : X == " + productX);
+        // Debug.Log("We took in coord.y : " + coordY + ", cast it to an integer : " + numberY + ", and then applied our equation to get : Y == " + productY);
+
+        // Debug.Log("MouseController -- nodeToReturn : GetNodeAt call STARTED.");
+        Node nodeToReturn = nodeGraph.GetNodeAt(productX, productY);
+        // Debug.Log("MouseController -- nodeToReturn : GetNodeAt call RETURNED.");
+
+        return nodeToReturn;
+    }
+
+}
