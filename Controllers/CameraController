@@ -1,0 +1,172 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+//
+using UnityEngine.Diagnostics;
+
+public class CameraController : MonoBehaviour
+{
+    public int borderInset = 5;
+    // *** May need to also set/reset in INSPECTOR. ***
+    public float speed = 10f;
+
+    private int screenWidth;
+    private int screenHeight;
+
+    #region CameraPanning() variables. ** Not currently used. Test001() implements these variables.
+    bool right, left, top, down;
+    #endregion
+
+    void Start()
+    {
+        screenWidth = Screen.width;
+        screenHeight = Screen.height;
+
+    }
+
+    #region Stopwatch() variables.
+    float timer = 5f;
+    bool countdown = false;
+    #endregion
+
+    void Update()
+    {
+        // Debug.Log("Speed : " + speed);
+
+        #region Stopwatch code
+        /*
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            countdown = true;
+            Debug.Log("Timer start.");
+            Debug.Log("Timer : " + timer);
+            Debug.Log("Start position : " + transform.position);
+        }
+
+        if(countdown)
+        {
+            Stopwatch();
+        }
+        */
+        #endregion
+
+        // Test001();    // *** 'speed' must be an extremely low value. Default : 0.1f
+        // Test002();          // Originally : transform.position += new Vector3(x, 0, z)... // http://answers.unity3d.com/questions/705677/move-camera-with-mouse-2d.html
+        Test003();             // 
+
+    }
+    
+    // * Not currently implemented.
+    void Stopwatch()
+    {
+        timer -= Time.deltaTime;
+
+        if(timer < 0)
+        {
+            Debug.Log("End position : " + transform.position);
+            Debug.Log("Timer end.");
+        }
+    }
+
+    #region Camera Panning Testing
+
+    // Rename?
+    // Move the camera when the mouse cursor touches an edge of 
+    // the screen (or corner) and move the camera in that direction.
+    // ***
+    // Move the camera when the mouse cursor is within the 
+    // developer-determined boundary that is inset from the camera frame.
+    void Test001()
+    {
+        Debug.Log("CameraPanning()");
+        // Debug.Log("Speed : " + speed);
+
+        // Check if camera is moving diagonally. 
+        // If so, SOFT COMPENSATION for camera movement speed diagonally.
+        if ((right && top) || (right && down) || (left && top) || (left && down))
+        {
+            speed /= 2;
+            Debug.Log("Speed : " + speed);
+        }
+
+        right = left = top = down = false;
+
+        if (Input.mousePosition.x > screenWidth - borderInset)
+        {
+            right = true;
+            Camera.main.transform.Translate(new Vector3(speed, 0, 0));
+        }
+
+        if (Input.mousePosition.x < 0 + borderInset)
+        {
+            left = true;
+            Camera.main.transform.Translate(new Vector3(-speed, 0, 0));
+        }
+
+        if (Input.mousePosition.y > screenHeight - borderInset)
+        {
+            top = true;
+            Camera.main.transform.Translate(new Vector3(0, speed, 0));
+        }
+
+        if (Input.mousePosition.y < 0 + borderInset)
+        {
+            down = true;
+            Camera.main.transform.Translate(new Vector3(0, -speed, 0));
+        }
+
+        speed = 0.1f;
+    }
+
+    void Test002()
+    {
+        if (Input.GetAxis("Mouse X") > 0)
+        {
+            transform.position += new Vector3(Input.GetAxisRaw("Mouse X") * Time.deltaTime * speed, Input.GetAxisRaw("Mouse Y") * Time.deltaTime * speed, 0f);
+        }
+
+        if (Input.GetAxis("Mouse X") < 0)
+        {
+            transform.position += new Vector3(Input.GetAxisRaw("Mouse X") * Time.deltaTime * speed, Input.GetAxisRaw("Mouse Y") * Time.deltaTime * speed, 0f);
+        }
+
+        if (Input.GetAxis("Mouse Y") < 0)
+        {
+            transform.position += new Vector3(Input.GetAxisRaw("Mouse X") * Time.deltaTime * speed, Input.GetAxisRaw("Mouse Y") * Time.deltaTime * speed, 0f);
+        }
+
+        if (Input.GetAxis("Mouse Y") > 0)
+        {
+            transform.position += new Vector3(Input.GetAxisRaw("Mouse X") * Time.deltaTime * speed, Input.GetAxisRaw("Mouse Y") * Time.deltaTime * speed, 0f);
+        }
+
+    }
+
+    // Solve how diagonals will work.
+    void Test003()
+    {
+        if (Input.mousePosition.x > screenWidth - borderInset)
+        {
+            transform.position += new Vector3(1f, 0f, 0f) * speed * Time.deltaTime;
+        }
+
+        if (Input.mousePosition.x < 0 + borderInset)
+        {
+            transform.position += new Vector3(-1f, 0f, 0f) * speed * Time.deltaTime;
+        }
+
+        if (Input.mousePosition.y > screenHeight - borderInset)
+        {
+            transform.position += new Vector3(0f, 1f, 0f) * speed * Time.deltaTime;
+        }
+
+        if (Input.mousePosition.y < 0 + borderInset)
+        {
+            transform.position += new Vector3(0f, -1f, 0f) * speed * Time.deltaTime;
+        }
+
+    }
+
+    #endregion
+
+}
