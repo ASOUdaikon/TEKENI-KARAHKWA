@@ -1,0 +1,109 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+// A node is PLACED (not centered? due to calculations) at a x/y ?+ 0.5 combination... Lazy.
+// A node "extends" toward 0.5, 0.5 away from its placement position.
+
+// A node encompasses an area of one of the following cases: 
+
+// 1) (x,       y)       to (x → (x + 0.5),   y → (y + 0.5))  == (0, 0)     → (0.5, 0.5) : Bottom left
+// 2) (x + 0.5, y)       to (x → (x + 1)  ,   y → (y + 0.5))  == (0.5, 0)   → (1, 0.5)   : Bottom right
+// 3) (x,       y + 0.5) to (x → (x + 0.5),   y → (y + 1))    == (0, 0.5)   → (0.5, 1)   : Top left
+// 4) (x + 0.5, y + 0.5) to (x → (x + 1)  ,   y → (y + 1))    == (0.5, 0.5) → (1, 1)     : Top right
+
+public class Node
+{
+    public float nodePosX { get; protected set; }
+    public float nodePosY { get; protected set; }
+
+    public NodeGraph nodeGraph;
+
+    public Tile tile;
+
+    // Do we need a world reference?
+    // public World world;
+
+    public Edge[] edges;
+    
+    // These are based off of nodes... And tiles? ***
+    public Node(NodeGraph nodeGraph, float x, float y, Tile tile)
+    {
+        this.nodeGraph = nodeGraph;
+        this.nodePosX = x;
+        this.nodePosY = y;
+        this.tile = tile;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="diagOkay">Is diagonal movement okay?</param>
+    /// <returns></returns>
+    public Node[] GetNeighborNodes(bool diagOkay = false)
+    {
+        Node[] neighborsNodes;
+
+        if (diagOkay == false)
+        {
+            neighborsNodes = new Node[4];    // N E S W
+        }
+        else
+        {
+            neighborsNodes = new Node[8];    // N E S W NE SE SW NW
+        }
+
+        Node potentialNeighbor;
+
+        // Think through our next steps... As in, which values are we passing to which function.
+        // X and Y do not exist in 'Node'. 'nodePosX' and 'nodePosY' exist... See direct above.
+
+        // CHANGES HERE : 
+        //                 world.GetTileAt ==> nodeGraph.GetNodeAt
+        //                 (X +/- 1, Y +/- 1) ==> (int)nodePosX +/- 1, (int)nodePosY +/- 1
+
+        potentialNeighbor = nodeGraph.GetNodeAt((int)nodePosX, (int)nodePosY + 1);
+        neighborsNodes[0] = potentialNeighbor;               // Could be null, but that's okay.
+        potentialNeighbor = nodeGraph.GetNodeAt((int)nodePosX + 1, (int)nodePosY);
+        neighborsNodes[1] = potentialNeighbor;               // Could be null, but that's okay.
+        potentialNeighbor = nodeGraph.GetNodeAt((int)nodePosX, (int)nodePosY - 1);
+        neighborsNodes[2] = potentialNeighbor;               // Could be null, but that's okay.
+        potentialNeighbor = nodeGraph.GetNodeAt((int)nodePosX - 1, (int)nodePosY);
+        neighborsNodes[3] = potentialNeighbor;               // Could be null, but that's okay.
+
+        if (diagOkay == true)
+        {
+            potentialNeighbor = nodeGraph.GetNodeAt((int)nodePosX + 1, (int)nodePosY + 1);
+            neighborsNodes[4] = potentialNeighbor;               // Could be null, but that's okay.
+            potentialNeighbor = nodeGraph.GetNodeAt((int)nodePosX + 1, (int)nodePosY - 1);
+            neighborsNodes[5] = potentialNeighbor;               // Could be null, but that's okay.
+            potentialNeighbor = nodeGraph.GetNodeAt((int)nodePosX - 1, (int)nodePosY - 1);
+            neighborsNodes[6] = potentialNeighbor;               // Could be null, but that's okay.
+            potentialNeighbor = nodeGraph.GetNodeAt((int)nodePosX - 1, (int)nodePosY + 1);
+            neighborsNodes[7] = potentialNeighbor;               // Could be null, but that's okay.
+        }
+
+        return neighborsNodes;
+    }
+
+    public Node North()
+    {
+        return nodeGraph.GetNodeAt((int)nodePosX, (int)nodePosY + 1);
+    }
+
+    public Node South()
+    {
+        return nodeGraph.GetNodeAt((int)nodePosX, (int)nodePosY - 1);
+    }
+
+    public Node East()
+    {
+        return nodeGraph.GetNodeAt((int)nodePosX + 1, (int)nodePosY);
+    }
+
+    public Node West()
+    {
+        return nodeGraph.GetNodeAt((int)nodePosX - 1, (int)nodePosY);
+    }
+
+}
