@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 // A node is PLACED (not centered? due to calculations) at a x/y ?+ 0.5 combination... Lazy.
 // A node "extends" toward 0.5, 0.5 away from its placement position.
@@ -20,6 +21,35 @@ public class Node
     public NodeGraph nodeGraph;
 
     public Tile tile;
+
+    // For sprite rendering. START
+    Action<Node> cbNodeChanged;
+    private bool visualState = true;
+    public bool VisualState
+    {
+        get { return visualState; }
+        set
+        {
+            bool oldVisualState = visualState;
+            visualState = value;
+            if(cbNodeChanged != null && oldVisualState != visualState)
+            {
+                cbNodeChanged(this);
+            }
+        }
+    }
+
+    public void RegisterNodeChangedCallback(Action<Node> callback)
+    {
+        cbNodeChanged += callback;
+    }
+
+    public void UnregisterNodeChangedCallback(Action<Node> callback)
+    {
+        cbNodeChanged -= callback;
+    }
+
+    // For sprite rendering. END
 
     // Do we need a world reference?
     // public World world;
