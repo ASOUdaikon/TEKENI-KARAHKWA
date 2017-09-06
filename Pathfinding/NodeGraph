@@ -46,7 +46,8 @@ public class NodeGraph : MonoBehaviour
 
         // GenerateNodeGraph();
         // GenerateNodeGraph002();
-        GenerateNodeGraph003();
+        // GenerateNodeGraph003();
+        GenerateNodeGraph005();
         // nSC.SetupNodeSprites();
         Debug.Log(nodesList.Count);  // 400 nodes when we're 10x10 tiles. 40,000 nodes when 100x100 tiles.
         // Debug.Log(1 / 2);
@@ -227,6 +228,48 @@ public class NodeGraph : MonoBehaviour
     void GenerateNodeGraph004()
     {
 
+    }
+
+    void GenerateNodeGraph005()
+    {
+        // World width/height * nodes per tile. :: 100 * 2 == 200 x 200 nodes (40,000)
+        nodesArray = new Node[nodeGraphSizeX, nodeGraphSizeY];
+
+        // Generate nodes.
+        // x/y should be width and height of world respectively.
+        for (int x = 0; x < nodeGraphSizeX; x++)     // x and y were defaulted to 2 (working values)
+        {
+            for (int y = 0; y < nodeGraphSizeY; y++)
+            {
+                // Get the node's x/y - positions.
+                float nodeX = x / nodesPerTileAxes;
+                float nodeY = y / nodesPerTileAxes;
+
+                // Or should we constrain modulo 'divisor' to hard-coded 2?
+                // *** This would always offset the node by 0.5 if x/y is an odd number?
+                if (x % nodesPerTileAxes != 0)  // Divide an int by 2... (default : 2)
+                {
+                    nodeX += 0.5f;
+                }
+                if (y % nodesPerTileAxes != 0)
+                {
+                    nodeY += 0.5f;
+                }
+
+                // Get the tile that encompasses the node.
+                Tile tileUnderNode = WorldController.Instance.world.GetTileAt(x / 2, y / 2);
+
+                // Create new node.
+                Node n = new Node(this, nodeX, nodeY, tileUnderNode);
+
+                // Add node to nodes array.
+                nodesArray[x, y] = n;
+                n.RegisterNodeChangedCallback(OnNodeChanged);
+
+                nodesList.Add(n);
+
+            }
+        }
     }
 
     // 'GetTileAt()' has : 
