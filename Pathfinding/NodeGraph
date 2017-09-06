@@ -160,9 +160,12 @@ public class NodeGraph : MonoBehaviour
         nodesArray = new Node[nodeGraphSizeX, nodeGraphSizeY];
 
         // Generate node holder.
+        // *** I don't need this due to 'NodeSpriteController'.
+        /*
         GameObject nodeHolder = new GameObject();
         nodeHolder.name = "Node_Holder";
         nodeHolder.transform.position = Vector3.zero;
+        */
 
         // Generate nodes.
         // x/y should be width and height of world respectively.
@@ -175,6 +178,7 @@ public class NodeGraph : MonoBehaviour
                 float nodeY = y / nodesPerTileAxes;
 
                 // Or should we constrain modulo 'divisor' to hard-coded 2?
+                // *** This would always offset the node by 0.5 if x/y is an odd number?
                 if (x % nodesPerTileAxes != 0)  // Divide an int by 2... (default : 2)
                 {
                     nodeX += 0.5f;
@@ -194,10 +198,13 @@ public class NodeGraph : MonoBehaviour
                 nodesArray[x, y] = n;
 
                 // Set new node's position.
+                // *** Why am I creating a GameObject here if I'm only keeping this in data?
+                /*
                 GameObject node_go = new GameObject();
                 node_go.transform.name = "Node_(" + nodeX + ", " + nodeY + ")";
                 node_go.transform.SetParent(nodeHolder.transform);
                 node_go.transform.position = new Vector3(nodeX, nodeY, 0);
+                */
 
                 // Set new node's sprite.
                 /*
@@ -206,6 +213,7 @@ public class NodeGraph : MonoBehaviour
                 sr.sortingLayerName = "Node";
                 */
 
+                // For testing; visuals.
                 n.RegisterNodeChangedCallback(OnNodeChanged);
 
                 nodesList.Add(n);
@@ -214,6 +222,13 @@ public class NodeGraph : MonoBehaviour
         }
     }
     
+    // TODO : 
+    // Loop through tiles and create nodes for each tile?
+    void GenerateNodeGraph004()
+    {
+
+    }
+
     // 'GetTileAt()' has : 
     //                     8 'GetNeighbor'                              ** in Tile
     //                     4 NESW                                       ** in Tile
