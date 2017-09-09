@@ -8,6 +8,7 @@ using UnityEngine;
 
 public class WorldController : MonoBehaviour
 {
+    // We have a single (static) instance of 'WorldController'. There can only be one.
     public static WorldController Instance { get; protected set; }
 
     public World world { get; protected set; }
