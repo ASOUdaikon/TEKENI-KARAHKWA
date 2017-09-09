@@ -6,9 +6,9 @@ using UnityEngine.Diagnostics;
 
 public class CameraController : MonoBehaviour
 {
-    public int borderInset = 5;
+    int borderInset = 15;
     // *** May need to also set/reset in INSPECTOR. ***
-    public float speed = 10f;
+    float speed = 5f;
 
     private int screenWidth;
     private int screenHeight;
@@ -26,7 +26,7 @@ public class CameraController : MonoBehaviour
 
     #region Stopwatch() variables.
     float timer = 5f;
-    bool countdown = false;
+    // bool countdown = false;
     #endregion
 
     void Update()
