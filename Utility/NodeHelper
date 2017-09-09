@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class Utility_Calculations {
+public static class NodeHelper {
 
     public static int GetNodeArrayElementFromFloat(float coord)
     {
