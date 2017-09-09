@@ -46,17 +46,11 @@ public class WorldController : MonoBehaviour
         return world.GetTileAt(x, y);
     }
 
-    // TODO : this needs a lot work
-    // Probably don't use this for now.
+    // TODO : Monitor this.
     public Node GetNodeAtWorldCoord(Vector3 coord)
     {
-        int x = Mathf.FloorToInt(coord.x);
-        int y = Mathf.FloorToInt(coord.y);
-        
-        if(coord.x > 0.5f)
-        {
-            // x += 0.5f;
-        }
+        int x = NodeHelper.GetNodeArrayElementFromFloat(coord.x);
+        int y = NodeHelper.GetNodeArrayElementFromFloat(coord.y);
 
         return nodeGraph.GetNodeAt(x, y);
     }
