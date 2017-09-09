@@ -7,7 +7,7 @@ using System;
 public class NodeGraph : MonoBehaviour
 {
     // FIXME
-    NodeSpriteController nSC;
+    // NodeSpriteController nSC;
     //
     Action<Node> cbNodeChanged;
 
@@ -30,13 +30,13 @@ public class NodeGraph : MonoBehaviour
     void Start()
     {
         // FIXME
-        nSC = GetComponent<NodeSpriteController>();
+        // nSC = GetComponent<NodeSpriteController>();
 
         nodesList = new List<Node>();
 
         nodeGraphSizeX = WorldController.Instance.world.Width * nodesPerTileAxes;
         nodeGraphSizeY = WorldController.Instance.world.Height * nodesPerTileAxes;
-         
+        
         // If I am to not use these variables, specifically the 'NodeGraphSizeX'/'NodeGraphSizeY',
         // will have to change 10~ references below.
         // int nodeGraphSizeX = WorldController.Instance.world.Width * nodesPerTileAxes;
@@ -47,9 +47,10 @@ public class NodeGraph : MonoBehaviour
         // GenerateNodeGraph();
         // GenerateNodeGraph002();
         // GenerateNodeGraph003();
-        GenerateNodeGraph005();
+        // GenerateNodeGraph005(WorldController.Instance.world);
+        GenerateNodeGraph006();
         // nSC.SetupNodeSprites();
-        Debug.Log(nodesList.Count);  // 400 nodes when we're 10x10 tiles. 40,000 nodes when 100x100 tiles.
+        Debug.Log("There are currently " + nodesList.Count + " nodes in our " + WorldController.Instance.world.Width + " by " + WorldController.Instance.world.Height + " tiles world.");  // 400 nodes when we're 10x10 tiles. 40,000 nodes when 100x100 tiles.
         // Debug.Log(1 / 2);
     }
 
@@ -70,10 +71,10 @@ public class NodeGraph : MonoBehaviour
             for (int y = 0; y < 100; y++)
             {
                 // Get the tile that encompasses the node.
-                Tile tileUnderNode = WorldController.Instance.world.GetTileAt(x, y);
+                // Tile tileUnderNode = WorldController.Instance.world.GetTileAt(x, y);
 
                 // Create new node.
-                Node n = new Node(this, x, y, tileUnderNode);
+                // Node n = new Node(this, x, y, tileUnderNode);
 
                 // Set new node's position.
                 GameObject node_go = new GameObject();
@@ -170,6 +171,7 @@ public class NodeGraph : MonoBehaviour
 
         // Generate nodes.
         // x/y should be width and height of world respectively.
+        // Multiplied world.Width with how many tiles per axes to get 'nodeGraphSizeX/Y'.
         for (int x = 0; x < nodeGraphSizeX; x++)     // x and y were defaulted to 2 (working values)
         {
             for (int y = 0; y < nodeGraphSizeY; y++)
@@ -230,24 +232,40 @@ public class NodeGraph : MonoBehaviour
 
     }
 
-    void GenerateNodeGraph005()
+    // Need world reference?
+    // Cycle through each tile, and create the amount of necessary nodes. Nested for loops?
+    void GenerateNodeGraph005(World world)
     {
         // World width/height * nodes per tile. :: 100 * 2 == 200 x 200 nodes (40,000)
         nodesArray = new Node[nodeGraphSizeX, nodeGraphSizeY];
 
-        // Generate nodes.
-        // x/y should be width and height of world respectively.
-        for (int x = 0; x < nodeGraphSizeX; x++)     // x and y were defaulted to 2 (working values)
+        // Loop through all tiles. Create nodes for each tile.
+        for (int x = 0; x < world.Width; x++)
         {
-            for (int y = 0; y < nodeGraphSizeY; y++)
+            for (int y = 0; y < world.Height; y++)
+            {
+                // Create node...
+
+            }
+        }
+
+    }
+
+    // Same as 003, but no sketches.
+    void GenerateNodeGraph006()
+    {
+        nodesArray = new Node[nodeGraphSizeX, nodeGraphSizeY];
+
+        #region Create Nodes
+        for (int x = 0; x < nodeGraphSizeX; x++)        // 20
+        {
+            for (int y = 0; y < nodeGraphSizeY; y++)    // 20
             {
                 // Get the node's x/y - positions.
                 float nodeX = x / nodesPerTileAxes;
                 float nodeY = y / nodesPerTileAxes;
-
-                // Or should we constrain modulo 'divisor' to hard-coded 2?
-                // *** This would always offset the node by 0.5 if x/y is an odd number?
-                if (x % nodesPerTileAxes != 0)  // Divide an int by 2... (default : 2)
+                
+                if (x % nodesPerTileAxes != 0) 
                 {
                     nodeX += 0.5f;
                 }
@@ -264,12 +282,96 @@ public class NodeGraph : MonoBehaviour
 
                 // Add node to nodes array.
                 nodesArray[x, y] = n;
+
+                // For testing; visuals.
                 n.RegisterNodeChangedCallback(OnNodeChanged);
 
                 nodesList.Add(n);
 
             }
         }
+        #endregion
+
+        #region Create Edges for each Node
+        //  ******************************
+
+        int edgeCount = 0;
+
+        foreach(Node n in nodesList)
+        {
+            // DO I KEEP EDGES LEADING OUT OF 'UNWALKABLE' NODES?
+
+            List<Edge> edges = new List<Edge>();
+
+            Node[] neighborNodes = n.GetNeighborNodes(true);
+
+            for (int i = 0; i < neighborNodes.Length; i++)
+            {
+                if(neighborNodes[i] != null && neighborNodes[i].tile.movementCost > 0)
+                {
+                    
+                    if(IsClippingCorner(n, neighborNodes[i]))
+                    {
+                        continue;
+                    }
+
+                    Edge edge = new Edge();
+                    edge.cost = neighborNodes[i].tile.movementCost;
+                    edge.node = neighborNodes[i];
+                    edges.Add(edge);
+
+                    edgeCount++;
+                }
+            }
+
+            n.edges = edges.ToArray();
+        }
+
+        Debug.Log("NodeGraph -- Created " + edgeCount + " edges.");
+
+        #endregion
+    }
+
+    // ********** MIGHT NEED WORK **********
+    bool IsClippingCorner(Node currNode, Node neighNode)
+    {
+        // If the movement from 'curr' to 'neigh' is diagonal (e.g. Northeast)
+        // Then check to make sure we aren't clipping (e.g. North and East are both walkable).
+
+        // Check if we are diagonal.
+        if (Mathf.Abs(currNode.nodePosX - neighNode.nodePosX) + Mathf.Abs(currNode.nodePosY - neighNode.nodePosY) == 2)
+        {
+            // We are diagonal.
+            float dX = currNode.nodePosX - neighNode.nodePosX;
+            float dY = currNode.nodePosY - neighNode.nodePosY;
+
+            //if (currNode.nodeGraph.GetNodeAt((int)currNode.nodePosX - (int)dX, (int)currNode.nodePosY).tile.movementCost == 0)
+            if(currNode.nodeGraph.
+                GetNodeAt(
+                          NodeHelper.GetNodeArrayElementFromFloat(currNode.nodePosX) - 
+                          NodeHelper.GetNodeArrayElementFromFloat(dX), 
+                          NodeHelper.GetNodeArrayElementFromFloat(currNode.nodePosY)
+               ).tile.movementCost == 0)
+            {
+                // East or West is unwalkable, therefore this would be a clipped movement.
+                return true;
+            }
+
+            // if (currNode.nodeGraph.GetNodeAt((int)currNode.nodePosX, (int)currNode.nodePosY - (int)dY).tile.movementCost == 0)
+            if(currNode.nodeGraph.
+                GetNodeAt(
+                          NodeHelper.GetNodeArrayElementFromFloat(currNode.nodePosX),
+                          NodeHelper.GetNodeArrayElementFromFloat(currNode.nodePosY) - 
+                          NodeHelper.GetNodeArrayElementFromFloat(dY)
+               ).tile.movementCost == 0)
+            {
+                // North or South is unwalkable, therefore this would be a clipped movement.
+                return true;
+            }
+
+        }
+
+        return false;
     }
 
     // 'GetTileAt()' has : 
@@ -283,12 +385,52 @@ public class NodeGraph : MonoBehaviour
         // Debug.Log("NodeGraph -- GetNodeAt ACTUAL.");
         if (x >= nodeGraphSizeX || x < 0 || y >= nodeGraphSizeY || y < 0)
         {
-            Debug.LogError("NODE (" + x + " ," + y + ") is out of range.");
+            // Debug.LogError("NODE (" + x + " ," + y + ") is out of range.");
             return null;
         }
 
-        Debug.Log("NODEGRAPH -- Node[" + x + ", " + y + "] is centered at world position : " + nodesArray[x, y].nodePosX + ", " + nodesArray[x, y].nodePosY);
+        // Debug.Log("NODEGRAPH -- Node[" + x + ", " + y + "] is centered at world position : " + nodesArray[x, y].nodePosX + ", " + nodesArray[x, y].nodePosY);
         return nodesArray[x, y];
+    }
+    
+    // Neighboring nodes are acquired incorrectly in 'Node.GetNeighborNodes()', which also
+    // is processed in the function immediately above - 'NodeGraph.GetNodeAt()'.
+    void OnDrawGizmos()
+    {
+        // SAVE
+        /*
+        Node n = GetNodeAt(1, 1);
+        // Debug.Log("Our test node is at : " + n.nodePosX + ", " + n.nodePosY);
+        // Debug.Log(n.edges.Length);
+
+        foreach(Edge edge in n.edges)
+        {
+            // Debug.Log("An edge points to : " + edge.node.nodePosX + ", " + edge.node.nodePosY);
+            Debug.DrawLine(new Vector3(n.nodePosX, n.nodePosY, 0), new Vector3(edge.node.nodePosX, edge.node.nodePosY, 0), Color.yellow, Mathf.Infinity, false);
+        }
+        */
+
+        /*
+        Node n2 = GetNodeAt(4, 3);
+        Debug.Log("Our test node is at : " + n.nodePosX + ", " + n.nodePosY);
+
+        foreach (Edge edge in n.edges)
+        {
+            Debug.Log("An edge points to : " + edge.node.nodePosX + ", " + edge.node.nodePosY);
+            Debug.DrawLine(new Vector3(n2.nodePosX, n2.nodePosY, 0), new Vector3(edge.node.nodePosX, edge.node.nodePosY, 0), Color.yellow, Mathf.Infinity, false);
+        }
+        */
+
+        // /*
+        foreach(Node n in nodesList)
+        {
+            foreach(Edge edge in n.edges)
+            {
+                Debug.DrawLine(new Vector3(n.nodePosX, n.nodePosY, 0), new Vector3(edge.node.nodePosX, edge.node.nodePosY, 0), Color.yellow, Mathf.Infinity, false);
+            }
+        }
+        // */
+
     }
 
     public void RegisterNodeChanged(Action<Node> callbackFunc)
