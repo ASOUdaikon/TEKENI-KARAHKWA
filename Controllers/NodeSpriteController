@@ -15,7 +15,7 @@ public class NodeSpriteController : MonoBehaviour {
 
 	void Start ()
     {
-        Debug.Log("NodeSpriteController == Start()");
+        // Debug.Log("NodeSpriteController == Start()");
 
         nodeGraph = WorldController.Instance.nodeGraph;
 
@@ -31,13 +31,13 @@ public class NodeSpriteController : MonoBehaviour {
     
     public void SetupNodeSprites()
     {
-        Debug.Log("SetupNodeSprites");
+        // Debug.Log("SetupNodeSprites");
         if (nodeGraph == null)
         {
             Debug.Log("What the fuck");
         }
 
-        Debug.Log(nodeGraph.nodeGraphSizeX + ", " + nodeGraph.nodeGraphSizeY);
+        Debug.Log("The size of our nodes array is : " + nodeGraph.nodeGraphSizeX + ", " + nodeGraph.nodeGraphSizeY);
 
         for (int x = 0; x < nodeGraph.nodeGraphSizeY; x++)
         {
