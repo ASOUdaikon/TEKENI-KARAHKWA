@@ -48,7 +48,6 @@ public class Node
     {
         cbNodeChanged -= callback;
     }
-
     // For sprite rendering. END
 
     // Do we need a world reference?
@@ -92,6 +91,10 @@ public class Node
         //                 world.GetTileAt ==> nodeGraph.GetNodeAt
         //                 (X +/- 1, Y +/- 1) ==> (int)nodePosX +/- 1, (int)nodePosY +/- 1
 
+        // Convert our floats into integers indirectly...? Not through casts.
+
+        #region Old, Incorrect(?) GetNeighbors
+        /*
         potentialNeighbor = nodeGraph.GetNodeAt((int)nodePosX, (int)nodePosY + 1);
         neighborsNodes[0] = potentialNeighbor;               // Could be null, but that's okay.
         potentialNeighbor = nodeGraph.GetNodeAt((int)nodePosX + 1, (int)nodePosY);
@@ -110,6 +113,29 @@ public class Node
             potentialNeighbor = nodeGraph.GetNodeAt((int)nodePosX - 1, (int)nodePosY - 1);
             neighborsNodes[6] = potentialNeighbor;               // Could be null, but that's okay.
             potentialNeighbor = nodeGraph.GetNodeAt((int)nodePosX - 1, (int)nodePosY + 1);
+            neighborsNodes[7] = potentialNeighbor;               // Could be null, but that's okay.
+        }
+        */
+        #endregion
+
+        potentialNeighbor = nodeGraph.GetNodeAt(NodeHelper.GetNodeArrayElementFromFloat(nodePosX), NodeHelper.GetNodeArrayElementFromFloat(nodePosY + 0.5f));
+        neighborsNodes[0] = potentialNeighbor;               // Could be null, but that's okay.
+        potentialNeighbor = nodeGraph.GetNodeAt(NodeHelper.GetNodeArrayElementFromFloat(nodePosX + 0.5f), NodeHelper.GetNodeArrayElementFromFloat(nodePosY));
+        neighborsNodes[1] = potentialNeighbor;               // Could be null, but that's okay.
+        potentialNeighbor = nodeGraph.GetNodeAt(NodeHelper.GetNodeArrayElementFromFloat(nodePosX), NodeHelper.GetNodeArrayElementFromFloat(nodePosY - 0.5f));
+        neighborsNodes[2] = potentialNeighbor;               // Could be null, but that's okay.
+        potentialNeighbor = nodeGraph.GetNodeAt(NodeHelper.GetNodeArrayElementFromFloat(nodePosX - 0.5f), NodeHelper.GetNodeArrayElementFromFloat(nodePosY));
+        neighborsNodes[3] = potentialNeighbor;               // Could be null, but that's okay.
+
+        if (diagOkay == true)
+        {
+            potentialNeighbor = nodeGraph.GetNodeAt(NodeHelper.GetNodeArrayElementFromFloat(nodePosX + 0.5f), NodeHelper.GetNodeArrayElementFromFloat(nodePosY + 0.5f));
+            neighborsNodes[4] = potentialNeighbor;               // Could be null, but that's okay.
+            potentialNeighbor = nodeGraph.GetNodeAt(NodeHelper.GetNodeArrayElementFromFloat(nodePosX + 0.5f), NodeHelper.GetNodeArrayElementFromFloat(nodePosY - 0.5f));
+            neighborsNodes[5] = potentialNeighbor;               // Could be null, but that's okay.
+            potentialNeighbor = nodeGraph.GetNodeAt(NodeHelper.GetNodeArrayElementFromFloat(nodePosX - 0.5f), NodeHelper.GetNodeArrayElementFromFloat(nodePosY - 0.5f));
+            neighborsNodes[6] = potentialNeighbor;               // Could be null, but that's okay.
+            potentialNeighbor = nodeGraph.GetNodeAt(NodeHelper.GetNodeArrayElementFromFloat(nodePosX - 0.5f), NodeHelper.GetNodeArrayElementFromFloat(nodePosY + 0.5f));
             neighborsNodes[7] = potentialNeighbor;               // Could be null, but that's okay.
         }
 
