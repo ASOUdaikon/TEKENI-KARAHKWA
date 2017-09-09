@@ -1,98 +1,111 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+//
+using System.Linq;
 
-// Since this is for testing, attach this to our node graph.
+public class TileSpriteController : MonoBehaviour
+{
+    public Sprite grassSprite;
+    public Sprite waterSprite;
 
-public class NodeSpriteController : MonoBehaviour {
+    Dictionary<Tile, GameObject> tileGameObjectMap;
 
-    // Use the white square outline.
-    public Sprite nodeSprite;
+    World world { get { return WorldController.Instance.world; } }
 
-    Dictionary<Node, GameObject> nodeGameObjectMap;
-
-    NodeGraph nodeGraph;
-
-	void Start ()
+    void Start()
     {
-        // Debug.Log("NodeSpriteController == Start()");
+        // Instantiate (initialize?) our dictionary that 
+        // tracks which GameObject is rendering which Tile data.
+        tileGameObjectMap = new Dictionary<Tile, GameObject>();
 
-        nodeGraph = WorldController.Instance.nodeGraph;
-
-        if(nodeGraph == null)
+        // Loop through our tiles and create a GameObject for each one.
+        for (int x = 0; x < world.Width; x++)
         {
-            Debug.Log("No 'NodeGraph' reference found.");
-        }
-
-        nodeGameObjectMap = new Dictionary<Node, GameObject>();
-
-        SetupNodeSprites();
-    }
-    
-    public void SetupNodeSprites()
-    {
-        // Debug.Log("SetupNodeSprites");
-        if (nodeGraph == null)
-        {
-            Debug.Log("What the fuck");
-        }
-
-        Debug.Log("The size of our nodes array is : " + nodeGraph.nodeGraphSizeX + ", " + nodeGraph.nodeGraphSizeY);
-
-        for (int x = 0; x < nodeGraph.nodeGraphSizeY; x++)
-        {
-            for (int y = 0; y < nodeGraph.nodeGraphSizeY; y++)
+            for (int y = 0; y < world.Height; y++)
             {
-                Node node_data = nodeGraph.nodesArray[x, y];
+                Tile tile_data = world.GetTileAt(x, y);
 
-                GameObject node_go = new GameObject();
+                GameObject tile_go = new GameObject();
 
-                nodeGameObjectMap.Add(node_data, node_go);
+                // Add our tile/GO pair to the dictionary.
+                tileGameObjectMap.Add(tile_data, tile_go);
 
-                node_go.name = "Node_" + x + "_" + y;
-                node_go.transform.position = new Vector3(node_data.nodePosX, node_data.nodePosY, 0);
-                node_go.transform.SetParent(this.transform, true);
+                tile_go.name = "Tile_" + x + "_" + y;
+                tile_go.transform.position = new Vector3(tile_data.X, tile_data.Y, 0);
+                tile_go.transform.SetParent(this.transform, true);
 
-                SpriteRenderer sr = node_go.AddComponent<SpriteRenderer>();
-                sr.sprite = nodeSprite;
-                sr.sortingLayerName = "Node";
+                // Add a sprite renderer. 
+                // Set a default sprite for empty tiles.
+                SpriteRenderer sr = tile_go.AddComponent<SpriteRenderer>();
+                sr.sprite = waterSprite;
+                sr.sortingLayerName = "Tile";
 
-                nodeGraph.RegisterNodeChanged(OnNodeChanged);
-
-                // Debug.Log("Node : " + x + ", " + y);
+                OnTileChanged(tile_data);
             }
         }
+
+        // Register 'WorldController.OnTileChanged()' (change the tile's sprite) to our callback.
+        world.RegisterTileChanged(OnTileChanged);
     }
 
-    void OnNodeChanged(Node node_data)
+    // THIS IS AN EXAMPLE -- NOT CURRENTLY USED
+    void DestroyAllTileGameObjects()
     {
-        if(nodeGameObjectMap.ContainsKey(node_data) == false)
+        // This function might get called when we are changing floors/levels.
+        // We need to destroy all visual **GameObjects** -- but not the actual tile data!
+
+        while (tileGameObjectMap.Count > 0)
         {
-            Debug.LogError("nodeGameObjectMap doesn't contain the node_data -- did you forget to add the node to the dictionary? Or maybe forgot to unregister a callback?");
+            Tile tile_data = tileGameObjectMap.Keys.First();
+            GameObject tile_go = tileGameObjectMap[tile_data];
+
+            // Remove the pair from the map.
+            tileGameObjectMap.Remove(tile_data);
+
+            // Unregister the callback.
+            tile_data.UnregisterTileTypeChangedCallback(OnTileChanged);
+
+            // Destroy the visual GameObject.
+            Destroy(tile_go);
+        }
+
+        // Presumably, after this function gets called, we'd be calling another 
+        // function to build all the GameObjects for the tiles on the new floor/level.
+
+    }
+
+    void OnTileChanged(Tile tile_data)
+    {
+        if (tileGameObjectMap.ContainsKey(tile_data) == false)
+        {
+            Debug.LogError("tileGameObjectMap doesn't contain the tile_data -- did you forget to add the tile to the dictionary? Or maybe forgot to unregister a callback?");
             return;
         }
 
-        GameObject node_go = nodeGameObjectMap[node_data];
+        GameObject tile_go = tileGameObjectMap[tile_data];
 
-        if(node_go == null)
+        if (tile_go == null)
         {
-            Debug.LogError("nodeGameObjectMap doesn't contain the node_data -- did you forget to add the node to the dictionary? Or maybe forgot to unregister a callback?");
+            Debug.LogError("tileGameObjectMap's returned GameObject is null -- did you forget to add the tile to the dictionary? Or maybe forgot to unregister a callback?");
             return;
         }
 
-        if(node_data.VisualState == true)
+        if (tile_data.Type == TileType.Grass)
         {
-            nodeGameObjectMap[node_data].SetActive(true);
+            // tile_go.GetComponent<SpriteRenderer>().sprite = floorSprite;
+            // int i = Random.Range(0, 9);
+            tile_go.GetComponent<SpriteRenderer>().sprite = grassSprite;
         }
-        else if(node_data.VisualState == false)
+        else if (tile_data.Type == TileType.Water)
         {
-            nodeGameObjectMap[node_data].SetActive(false);
+            tile_go.GetComponent<SpriteRenderer>().sprite = waterSprite;
         }
         else
         {
-            Debug.LogError("NodeGraph -- OnNodeChanged() -- It's a bool, what the fuck.");
+            Debug.LogError("WorldController - OnTileTypeChanged() - Unrecognized tile type.");
         }
-
     }
+
 
 }
