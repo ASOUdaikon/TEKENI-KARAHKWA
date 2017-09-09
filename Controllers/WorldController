@@ -46,6 +46,7 @@ public class WorldController : MonoBehaviour
     }
 
     // TODO : this needs a lot work
+    // Probably don't use this for now.
     public Node GetNodeAtWorldCoord(Vector3 coord)
     {
         int x = Mathf.FloorToInt(coord.x);
@@ -65,7 +66,7 @@ public class WorldController : MonoBehaviour
         // world = new World(100, 100);
 
         // For testing.
-        world = new World(10, 10);
+        world = new World(4, 4);
 
         // Center the camera.
         Camera.main.transform.position = new Vector3(world.Width / 2, world.Height / 2, Camera.main.transform.position.z);
