@@ -25,7 +25,11 @@ public class MouseController : MonoBehaviour {
             Vector3 cursorPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             // Debug.Log(cursorPosition);
             // Debug.Log(cursorPosition.x + " subtracted by " + (int)cursorPosition.x + " equals " + (cursorPosition.x - (int)cursorPosition.x));
-            Node nodeUnderMouse = GetNodeFromMouseClick(cursorPosition.x, cursorPosition.y);
+            // Node nodeUnderMouse = GetNodeFromMouseClick(cursorPosition.x, cursorPosition.y);
+            int nodeX = NodeHelper.GetNodeArrayElementFromFloat(cursorPosition.x);
+            int nodeY = NodeHelper.GetNodeArrayElementFromFloat(cursorPosition.y);
+            Node nodeUnderMouse = nodeGraph.GetNodeAt(nodeX, nodeY);
+
             NodeSpriteSwapActiveState(nodeUnderMouse);
             // Debug.Log("MOUSECONTROLLER -- Node at mouse left-click position : " + nodeUnderMouse.nodePosX + ", " + nodeUnderMouse.nodePosY);
             Debug.Log("This node has a movement cost of : " + nodeUnderMouse.tile.movementCost);
