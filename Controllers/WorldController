@@ -24,14 +24,19 @@ public class WorldController : MonoBehaviour
         }
         Instance = this; // Meaning, literally this script or 'instance' of this script (whatever it is attached to) is the actual WorldController.
         
-        // 
-        nodeGraph = FindObjectOfType<NodeGraph>();
+        CreateEmptyWorld();
+        Debug.Log("CreateEmptyWorld()");
+        // ****
+        // NodeGraph nodeGraph = new NodeGraph(world);
+
+        // /*
+        // nodeGraph = FindObjectOfType<NodeGraph>();
+        nodeGraph = new NodeGraph();
         if (nodeGraph == null)
         {
             Debug.Log("WorldController does not have an active reference to 'nodeGraph'.");
         }
-
-        CreateEmptyWorld();
+        // */
     }
 
     /// Gets the tile at the unity-space coordinates.
@@ -47,6 +52,7 @@ public class WorldController : MonoBehaviour
     }
 
     // TODO : Monitor this.
+    // TODO : Suitable location?
     public Node GetNodeAtWorldCoord(Vector3 coord)
     {
         int x = NodeHelper.GetNodeArrayElementFromFloat(coord.x);
@@ -65,6 +71,22 @@ public class WorldController : MonoBehaviour
 
         // Center the camera.
         Camera.main.transform.position = new Vector3(world.Width / 2, world.Height / 2, Camera.main.transform.position.z);
+
+    }
+
+    void OnDrawGizmos()
+    {
+        // /*
+        foreach (Node n in nodeGraph.nodesList)
+        {
+            foreach (Edge edge in n.edges)
+            {
+                // Adding a 0.25f to each x/y coordinate allows 
+                // us to draw from the center of each node.
+                Debug.DrawLine(new Vector3(n.nodePosX + 0.25f, n.nodePosY + 0.25f, 0), new Vector3(edge.node.nodePosX + 0.25f, edge.node.nodePosY + 0.25f, 0), Color.yellow, Mathf.Infinity, false);
+            }
+        }
+        // */
 
     }
 
