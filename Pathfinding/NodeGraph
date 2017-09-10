@@ -5,16 +5,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// This is the equivalent of 'World'.
-// What is the equivalent of 'WorldController'? Path_AStar?
-public class NodeGraph // : MonoBehaviour
+public class NodeGraph
 {
     //
     Action<Node> cbNodeChanged;
-
-    // Set in inspector; editor mode.
-    // public Sprite testSprite;
-
+    
     public List<Node> nodesList;
     public Node[,] nodesArray;
 
@@ -27,23 +22,6 @@ public class NodeGraph // : MonoBehaviour
     [HideInInspector]
     public int nodeGraphSizeY;
     
-    /*
-    void Start()
-    {
-        nodesList = new List<Node>();
-
-        nodeGraphSizeX = WorldController.Instance.world.Width * nodesPerTileAxes;
-        nodeGraphSizeY = WorldController.Instance.world.Height * nodesPerTileAxes;
-
-        GenerateNodeGraph006();
-
-        // Note : 400 nodes when we're 10x10 tiles. 40,000 nodes when 100x100 tiles.
-        Debug.Log("There are currently " + nodesList.Count + " nodes in our " + WorldController.Instance.world.Width + " by " + WorldController.Instance.world.Height + " tiles world.");  
-    }
-    */
-
-    // void GenerateNodeGraph006()
-    // public NodeGraph(World world)
     public NodeGraph()
     {
         //
@@ -186,47 +164,6 @@ public class NodeGraph // : MonoBehaviour
         return nodesArray[x, y];
     }
     
-    /*
-    void OnDrawGizmos()
-    {
-        // SAVE
-        /*
-        Node n = GetNodeAt(1, 1);
-        // Debug.Log("Our test node is at : " + n.nodePosX + ", " + n.nodePosY);
-        // Debug.Log(n.edges.Length);
-
-        foreach(Edge edge in n.edges)
-        {
-            // Debug.Log("An edge points to : " + edge.node.nodePosX + ", " + edge.node.nodePosY);
-            Debug.DrawLine(new Vector3(n.nodePosX, n.nodePosY, 0), new Vector3(edge.node.nodePosX, edge.node.nodePosY, 0), Color.yellow, Mathf.Infinity, false);
-        }
-        */
-
-        /*
-        Node n2 = GetNodeAt(4, 3);
-        Debug.Log("Our test node is at : " + n.nodePosX + ", " + n.nodePosY);
-
-        foreach (Edge edge in n.edges)
-        {
-            Debug.Log("An edge points to : " + edge.node.nodePosX + ", " + edge.node.nodePosY);
-            Debug.DrawLine(new Vector3(n2.nodePosX, n2.nodePosY, 0), new Vector3(edge.node.nodePosX, edge.node.nodePosY, 0), Color.yellow, Mathf.Infinity, false);
-        }
-        
-
-        // 
-        foreach(Node n in nodesList)
-        {
-            foreach(Edge edge in n.edges)
-            {
-                // Adding a 0.25f to each x/y coordinate allows 
-                // us to draw from the center of each node.
-                Debug.DrawLine(new Vector3(n.nodePosX + 0.25f, n.nodePosY + 0.25f, 0), new Vector3(edge.node.nodePosX + 0.25f, edge.node.nodePosY + 0.25f, 0), Color.yellow, Mathf.Infinity, false);
-            }
-        }
-        // /
-
-    }
-    */
     public void RegisterNodeChanged(Action<Node> callbackFunc)
     {
         cbNodeChanged += callbackFunc;
