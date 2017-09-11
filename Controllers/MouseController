@@ -4,50 +4,29 @@ using UnityEngine;
 
 public class MouseController : MonoBehaviour {
 
-    // NodeGraph nodeGraph;
-    
+    NodeSpriteController nSC;
+
 	void Start ()
     {
-        /*
-        nodeGraph = WorldController.Instance.nodeGraph;
-        
-        if(nodeGraph == null)
-        {
-            Debug.Log("MouseController does not have an active reference to 'nodeGraph'.");
-        }
-        */
+        nSC = FindObjectOfType<NodeSpriteController>();
 	}
 	
 	void Update ()
     {
-		if(Input.GetMouseButtonDown(0))
+        SwapNodeSprite();	
+	}
+    
+    void SwapNodeSprite()
+    {
+        if (Input.GetMouseButtonDown(0))
         {
             Vector3 cursorPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
-            // Method #1 :
-            // int nodeX = NodeHelper.GetNodeArrayElementFromFloat(cursorPosition.x);
-            // int nodeY = NodeHelper.GetNodeArrayElementFromFloat(cursorPosition.y);
-            // Node nodeUnderMouse = nodeGraph.GetNodeAt(nodeX, nodeY);
-
-            // Method #2 :
             Node nodeUnderMouse = WorldController.Instance.GetNodeAtWorldCoord(cursorPosition);
 
-            NodeSpriteSwapActiveState(nodeUnderMouse);
-            // Debug.Log("This node has a movement cost of : " + nodeUnderMouse.tile.movementCost);
-        }
-	}
-
-    // TODO : Move to more suitable location.
-    public void NodeSpriteSwapActiveState(Node nodeUnderMouse)
-    {
-        if(nodeUnderMouse.VisualState == true)
-        {
-            nodeUnderMouse.VisualState = false;
-        }
-        else if(nodeUnderMouse.VisualState == false)
-        {
-            nodeUnderMouse.VisualState = true;
+            nSC.NodeSpriteSwapCurrentState(nodeUnderMouse);
         }
     }
+    
 
 }
