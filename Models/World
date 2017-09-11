@@ -13,7 +13,7 @@ public class World
     public int Height { get; protected set; }
     
     Action<Tile> cbTileChanged;
-
+    
     public World(int width, int height)
     {
         // Creates an empty world.
