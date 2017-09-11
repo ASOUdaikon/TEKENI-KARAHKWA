@@ -6,51 +6,19 @@ public static class NodeHelper {
 
     public static int GetNodeArrayElementFromFloat(float coord)
     {
-        // pass in 3.5
+        int arrayElement;                    
+        int number = Mathf.FloorToInt(coord);
+        float decRemainder = coord - number;
 
-        int product;                    
-        int number = Mathf.FloorToInt(coord);   // 3
-        float decRemainder = coord - number;    // 3.5 - 3 = 0.5
+        arrayElement = number * 2;
 
-        product = number * 2;                   // 6
-
-        if (decRemainder >= 0.5f)               // ??? is 0.5
+        if (decRemainder >= 0.5f)
         {
-            product += 1;                       // 6 += 1 ==> 7
+            arrayElement += 1;
         }
 
-        return product;                         // 7
-
-        // Node nodeToReturn = nodeGraph.GetNodeAt(productX, productY);
-
-        // return nodeToReturn;
+        return arrayElement;
     }
-
-    /*
-    public static int[,] GetNodeFromFloat(float coordX, float coordY)
-    {
-        int productX, productY;
-        int numberX = Mathf.FloorToInt(coordX);
-        int numberY = Mathf.FloorToInt(coordY);
-        float xDecRemainder = coordX - numberX;
-        float yDecRemainder = coordY - numberY;
-
-        productX = numberX * 2;
-        productY = numberY * 2;
-        
-        if (xDecRemainder >= 0.5f)
-        {
-            productX += 1;
-        }
-        if (yDecRemainder >= 0.5f)
-        {
-            productY += 1;
-        }
-        
-        // Node nodeToReturn = nodeGraph.GetNodeAt(productX, productY);
-
-        // return nodeToReturn;
-    }
-    */
+    
 
 }
