@@ -16,6 +16,7 @@ public class WorldController : MonoBehaviour
     // Needs to be 'public' for other classes to reference it.
     public NodeGraph nodeGraph;
 
+    // 1 : Awake == 2 : OnEnable == 3 : Start
     void OnEnable()
     {
         if (Instance != null)
@@ -25,18 +26,12 @@ public class WorldController : MonoBehaviour
         Instance = this; // Meaning, literally this script or 'instance' of this script (whatever it is attached to) is the actual WorldController.
         
         CreateEmptyWorld();
-        Debug.Log("CreateEmptyWorld()");
-        // ****
-        // NodeGraph nodeGraph = new NodeGraph(world);
 
-        // /*
-        // nodeGraph = FindObjectOfType<NodeGraph>();
         nodeGraph = new NodeGraph();
         if (nodeGraph == null)
         {
             Debug.Log("WorldController does not have an active reference to 'nodeGraph'.");
         }
-        // */
     }
 
     /// Gets the tile at the unity-space coordinates.
@@ -64,19 +59,19 @@ public class WorldController : MonoBehaviour
     void CreateEmptyWorld()
     {
         // Create a world with empty tiles.
-        // world = new World(100, 100);
+        world = new World(100, 100);
 
         // For testing.
-        world = new World(4, 4);
+        // world = new World(4, 4);
 
         // Center the camera.
         Camera.main.transform.position = new Vector3(world.Width / 2, world.Height / 2, Camera.main.transform.position.z);
 
     }
 
+    /*
     void OnDrawGizmos()
     {
-        // /*
         foreach (Node n in nodeGraph.nodesList)
         {
             foreach (Edge edge in n.edges)
@@ -86,8 +81,8 @@ public class WorldController : MonoBehaviour
                 Debug.DrawLine(new Vector3(n.nodePosX + 0.25f, n.nodePosY + 0.25f, 0), new Vector3(edge.node.nodePosX + 0.25f, edge.node.nodePosY + 0.25f, 0), Color.yellow, Mathf.Infinity, false);
             }
         }
-        // */
 
     }
+    */    
 
 }
